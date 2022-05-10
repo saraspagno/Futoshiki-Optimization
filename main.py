@@ -13,7 +13,6 @@ def parse_args(args_file):
     constants.N = int(lines[0]) # the first line is the size of the matrix
     lines.remove(lines[0])
     constants.num_of_constants = int(lines[0]) # the second line is the number of given digits
-
     constant_numbers ={}
     for constant_value_place in lines[0:constants.num_of_constants]:
         line_values = list(map(int, constant_value_place.split(' ')))
