@@ -7,13 +7,24 @@ from Game import Game
 # def print_board(board):
 #     print('\n'.join(['\t'.join([str(cell) for cell in j]) for j in board]))
 
+def print_population(population):
+    print('Population:')
+    for i in range(len(population)):
+        print(f'{i}: {population[i]}')
+
+
+def print_population_and_fitness(population, fitness):
+    print('Population:')
+    for i in range(len(population)):
+        print(f'{i}: {population[i]}, fitness: {fitness[i]}')
+
 
 class GeneticAlgo:
     def __init__(self, game: Game):
         self.game = game
         self.population = []
         self.initialize_population()
-        print('Population:', self.population)
+        # print_population(self.population)
 
     def set_constants_in_grid(self, grid):
         for c in self.game.constant_numbers:
@@ -59,12 +70,21 @@ class GeneticAlgo:
         # counting the columns constraint
         for column in grid.T:
             _, counts = np.unique(column, return_counts=True)
-            # adding 0 if appears 1, 1 if appears 2, 2 if appears 3, etc.
+            # adding 0 if appears 1, 2 if appears 2, 4 if appears 3, etc.
             for occurrence in counts:
-                errors += occurrence - 1
-
+                # errors += (occurrence - 1) * 2
+                if occurrence != 1:
+                    errors += pow(4, (occurrence - 1))
         return errors
 
     def selection(self):
+        prob_dist = []
         for i in range(constants.M):
-            print('Fitness at:', i, 'is', self.fitness(self.population[i]))
+            fitness_value = self.fitness(self.population[i])
+            prob_dist.append(float(fitness_value))
+        print_population_and_fitness(self.population, prob_dist)
+        inverted = np.reciprocal(prob_dist)
+        normalized = np.divide(inverted, np.sum(inverted))
+        chosen = np.random.choice(range(len(self.population)), 2, p=normalized)
+        print(f'Selection, chosen indexes: {chosen[0], chosen[1]}, with weights: {prob_dist[chosen[0]], prob_dist[chosen[1]]}')
+        return self.population[chosen[0]], self.population[chosen[1]]
