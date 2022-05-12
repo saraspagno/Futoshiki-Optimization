@@ -17,6 +17,8 @@ def parse_args(args_file):
     for i in range(int(lines[index])):
         index += 1
         line_values = list(map(int, lines[index].split(' ')))
+        line_values[0] -= 1
+        line_values[1] -= 1
         constant_numbers.append(line_values)
 
     index += 1
@@ -37,4 +39,5 @@ if __name__ == '__main__':
     constant_numbers, greater_constraints = parse_args('args.txt')
     game = Game(constant_numbers, greater_constraints)
     genetic_algo = GeneticAlgo(game)
-    genetic_algo.selection()
+    genetic_algo.start()
+
