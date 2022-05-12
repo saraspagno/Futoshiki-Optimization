@@ -107,7 +107,7 @@ class GeneticAlgo:
         return np.array(new_grid)
 
     def mutation(self, grid):
-        do = random.random() < constants.M
+        do = random.random() < constants.MU
         if do:
             random_row_index = random.choice(range(5))
             filled_indexes = []
