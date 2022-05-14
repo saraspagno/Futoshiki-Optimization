@@ -19,7 +19,7 @@ def print_population_and_fitness(population, fitness):
         print(f'{i}: {population[i]}, fitness: {fitness[i]}')
 
 
-class GeneticAlgo:
+class Lamarck:
     def __init__(self, game: Game):
         self.game = game
         self.population = []
@@ -66,7 +66,8 @@ class GeneticAlgo:
                 # errors += (occurrence - 1) * 2
                 if occurrence != 1:
                     errors += pow(constants.C, (occurrence - 1))
-        return errors
+
+        return float(errors)
 
     # function to create M random grids
     def initialize_population(self):
@@ -80,22 +81,18 @@ class GeneticAlgo:
         inverted = np.reciprocal(self.pop_fitness)
         normalized = np.divide(inverted, np.sum(inverted))
         chosen = np.random.choice(range(len(self.population)), 2, p=normalized)
-        print_population_and_fitness(self.population, self.pop_fitness)
-        print(
-            f'Selection, chosen indexes: {chosen[0], chosen[1]}, with weights: {self.pop_fitness[chosen[0]], self.pop_fitness[chosen[1]]}')
+        # print_population_and_fitness(self.population, self.pop_fitness)
+        # print(f'Selection, chosen indexes: {chosen[0], chosen[1]}, with weights: {self.pop_fitness[chosen[0]], self.pop_fitness[chosen[1]]}')
         return self.population[chosen[0]], self.population[chosen[1]]
 
     def selection(self):
         print_population_and_fitness(self.population, self.pop_fitness)
         indexes = np.argpartition(self.pop_fitness, 2)
-        print(
-            f'Selection, chosen indexes: {indexes[0], indexes[1]}, with weights: {self.pop_fitness[indexes[0]], self.pop_fitness[indexes[1]]}')
+        # print(f'Selection, chosen indexes: {indexes[0], indexes[1]}, with weights: {self.pop_fitness[indexes[0]], self.pop_fitness[indexes[1]]}')
         return self.population[indexes[0]], self.population[indexes[1]]
 
     # todo: how to implement different dividers? now it's always half
     def cross_over(self, grid1, grid2):
-        # divider = len(grid1) // 2
-        # divider = 1
         divider = random.choice(range(5))
         new_grid = []
         for x in grid1[:divider]:
@@ -104,12 +101,11 @@ class GeneticAlgo:
             new_grid.append(x.tolist())
         return np.array(new_grid)
 
-    def mutation(self, grid):
-        do = random.random() < constants.MU
+    def mutation(self, grid, prob):
+        do = random.random() < prob
         if do:
-            print('Mutation is happening!!')
-            print('Grid Before:', grid)
-            to_change = len(grid) // 2
+            # to_change = random.choice(range(1, constants.N + 1))
+            to_change = 4
             random_row_indexes = random.sample(range(constants.N), to_change)
             for i in random_row_indexes:
                 new_row = [0 for i in range(constants.N)]
@@ -123,7 +119,7 @@ class GeneticAlgo:
                         new_row[random_index] = n
                         filled_indexes.append(random_index)
                 grid[i] = new_row
-            print('Grid After:', grid)
+            # print('Grid After:', grid)
 
     def replace(self, new_grid):
         new_fitness = self.fitness(new_grid)
@@ -142,22 +138,64 @@ class GeneticAlgo:
         self.pop_fitness[worst_index] = float(new_fitness)
         return False
 
-    # def stop_algo(self):
-    #     min_fitness = np.min(self.pop_fitness)
-    #     print('Iteration min:', min_fitness)
-    #     max_fitness = np.max(self.pop_fitness)
-    #     print('Compare:', min_fitness, max_fitness)
-    #     return min_fitness == 0
+    def optimize(self, grid):
+        for g in self.game.constraints:
+            if g[0] == g[2]:
+                if grid[g[0], g[1]] < grid[g[2], g[3]]:
+                    temp = grid[g[0], g[1]]
+                    grid[g[0], g[1]] = grid[g[2], g[3]]
+                    grid[g[2], g[3]] = temp
+
 
     def start(self):
+        # check = np.array([[3, 5, 1, 4, 2], [5, 4, 1, 2, 3], [4, 5, 2, 3, 1], [5, 1, 3, 2, 4], [2, 3, 4, 1, 5]])
+        # print('Fitness is:', self.fitness(check))
         self.initialize_population()
         iteration = 0
         should_stop = False
         while not should_stop:
             print(f'\n\n\nITERATION N.{iteration}')
-            print('Counter: ', self.counter)
             iteration += 1
-            grid1, grid2 = self.selection_with_prob()
-            grid3 = self.cross_over(grid1, grid2)
-            self.mutation(grid3)
-            should_stop = self.replace(grid3)
+            print('Counter: ', self.counter)
+            print_population_and_fitness(self.population, self.pop_fitness)
+
+            new_population = []
+            new_fitness = []
+
+            min_index = np.argmin(self.pop_fitness)
+            min_fitness = self.pop_fitness[min_index]
+            print('Min is: ', min_fitness)
+            if min_fitness == 0:
+                break
+
+            for i in range(int(0.1 * constants.M)):
+                grid = self.population[min_index].copy()
+                self.optimize(grid)
+                new_population.append(grid)
+                new_fitness.append(self.fitness(grid))
+            for i in range(int(0.7 * constants.M)):
+                grid1, grid2 = self.selection_with_prob()
+                grid3 = self.cross_over(grid1, grid2)
+                self.mutation(grid3, constants.MU)
+                self.optimize(grid3)
+                new_population.append(grid3)
+                grid3_fitness = self.fitness(grid3)
+                if grid3_fitness == 0:
+                    print("Found")
+                    break
+                new_fitness.append(grid3_fitness)
+
+            for i in range(int(0.2 * constants.M)):
+                copy = new_population[0].copy()
+                self.mutation(copy, 1)
+                self.optimize(copy)
+                new_population.append(copy)
+                new_fitness.append(self.fitness(copy))
+
+            # indexes = random.sample(range(constants.M), 30)
+            # for i in indexes:
+            #     self.mutation(new_population[i])
+            #     new_fitness[i] = self.fitness(new_population[i])
+
+            self.population = np.array(new_population)
+            self.pop_fitness = np.array(new_fitness)

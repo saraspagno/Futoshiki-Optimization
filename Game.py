@@ -7,8 +7,12 @@ class Game:
     def __init__(self, constant_numbers, constraints):
         self.constraints = constraints
         self.constant_numbers = constant_numbers
-        # self.grid = np.array([[0 for i in range(constants.N)] for j in range(constants.N)])
-        # self.set_constants()
+        self.taken_indexes_by_row = [[] for i in range(constants.N)]
+        self.taken_values_by_row = [[] for i in range(constants.N)]
+        for c in constant_numbers:
+            self.taken_indexes_by_row[c[0]].append(c[1])
+            self.taken_values_by_row[c[0]].append(c[2])
+
 
     # def set_constants(self):
     #     for c in self.constant_numbers:
