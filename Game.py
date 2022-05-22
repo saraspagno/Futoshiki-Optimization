@@ -4,60 +4,107 @@ import random
 import constants
 
 
+def print_possibilities(possibilities):
+    for i in possibilities:
+        line_list = i.tolist()
+        print(line_list)
+    print('\n')
+
+
 class Game:
-    def __init__(self, constant_numbers, constraints):
+    def __init__(self, constant_numbers: list, constraints):
         self.constraints = constraints
         self.constant_numbers = constant_numbers
         self.taken_indexes_by_row = [[] for i in range(constants.N)]
         self.taken_values_by_row = [[] for i in range(constants.N)]
-        self.taken_columns_by_value = [[] for i in range(constants.N)]
         self.greater_by_row = [[] for i in range(constants.N)]
         self.smaller_by_row = [[] for i in range(constants.N)]
+        self.initial_possibilities = np.array([[[True for i in range(constants.N)] for i in range(constants.N)] for i in
+                                               range(constants.N)])
 
         self.pencil_init()
-
-    def pencil_init(self):
-        for c in self.constant_numbers:
-            # if a constant value is 2
-            if c[2] == 2:
-                # check if a greater starts with its coordinates
-                for g in self.constraints:
-                    if g[0] == c[0] and g[1] == c[1]:
-                        self.constant_numbers.append([g[2], g[3], 1])
-                        self.constraints.remove(g)
-            if c[2] == constants.N - 1:
-                # check if a greater end with its coordinates
-                for g in self.constraints:
-                    if g[2] == c[0] and g[3] == c[1]:
-                        self.constant_numbers.append([g[0], g[1], 5])
-                        self.constraints.remove(g)
-
         for c in self.constant_numbers:
             self.taken_indexes_by_row[c[0]].append(c[1])
             self.taken_values_by_row[c[0]].append(c[2])
-            self.taken_columns_by_value[c[2] - 1].append(c[1])
 
         for g in self.constraints:
             self.greater_by_row[g[0]].append(g[1])
             self.smaller_by_row[g[2]].append(g[3])
 
-        row_values = [i for i in range(constants.N)]
-        should_continue = True
-        while should_continue:
-            should_continue = False
-            # for each row
-            for i in range(constants.N):
-                for value in [5, 1, 2, 3, 4]:
-                    if value not in self.taken_values_by_row[i]:
-                        if value == constants.N:
-                            possible_indexes = [x for x in row_values if x not in (self.taken_indexes_by_row[i] + self.smaller_by_row[i] + self.taken_columns_by_value[value - 1])]
-                        elif value == 1:
-                            possible_indexes = [x for x in row_values if x not in (self.taken_indexes_by_row[i] + self.greater_by_row[i] + self.taken_columns_by_value[value - 1])]
-                        else:
-                            possible_indexes = [x for x in row_values if x not in (self.taken_indexes_by_row[i] + self.taken_columns_by_value[value - 1])]
-                        if len(possible_indexes) == 1:
-                            self.constant_numbers.append([i, possible_indexes[0], value])
-                            self.taken_indexes_by_row[i].append(possible_indexes[0])
-                            self.taken_values_by_row[i].append(value)
-                            self.taken_columns_by_value[value - 1].append(possible_indexes[0])
-                            should_continue = True
+    def pencil_init(self):
+        print_possibilities(self.initial_possibilities)
+        # update constants
+        self.initialize_constants()
+        self.initialize_greater()
+        is_done = False
+        while not is_done:
+            self.initialize_constants()
+            is_done = self.update_constants()
+
+    def update_constants(self):
+        print('Update constants')
+        is_done = True
+        # for each element in each row:
+        for i, row in enumerate(self.initial_possibilities):
+            for j, element in enumerate(row):
+                # if there is only one true
+                if sum(element) == 1:
+                    # get index of true
+                    index = np.where(element == True)[0][0]
+                    # check if not already in constants
+                    if [i, j, index + 1] not in self.constant_numbers:
+                        self.constant_numbers.append([i, j, index + 1])
+                        is_done = False
+        # for each element in each column:
+        for i, column in enumerate(self.initial_possibilities.T):
+            for j, element in enumerate(column):
+                # if there is only one true
+                if sum(element) == 1:
+                    # get index of true
+                    index = np.where(element == True)[0][0]
+                    # check if not already in constants
+                    if [index, j, i + 1] not in self.constant_numbers:
+                        self.constant_numbers.append([index, j, i + 1])
+                        is_done = False
+        print_possibilities(self.initial_possibilities)
+        return is_done
+
+    def initialize_constants(self):
+        print('Constants')
+        # 1. put all constant numbers
+        for c in self.constant_numbers:
+            index = c[2] - 1
+            for row in self.initial_possibilities[c[0]]:
+                row[index] = False
+            for column in self.initial_possibilities[:, c[1]]:
+                column[index] = False
+            self.initial_possibilities[c[0], c[1], index] = True
+            current = self.initial_possibilities[c[0], c[1]]
+            for i in range(len(current)):
+                if i != index:
+                    current[i] = False
+            for g in self.constraints:
+                if g[0] == c[0] and g[1] == c[1]:
+                    print('inside smaller')
+                    # go to smaller and remove all great or equal
+                    smaller = self.initial_possibilities[g[2]][g[3]]
+                    for i in range(len(smaller)):
+                        if i > index:
+                            smaller[i] = False
+                if g[2] == c[0] and g[3] == c[1]:
+                    print('inside greater')
+                    # go to smaller and remove all great or equal
+                    greater = self.initial_possibilities[g[0]][g[1]]
+                    for i in range(len(greater)):
+                        if i < index:
+                            greater[i] = False
+        print_possibilities(self.initial_possibilities)
+
+    def initialize_greater(self):
+        print('Greater')
+        for g in self.constraints:
+            greater = self.initial_possibilities[g[0], g[1]]
+            greater[0] = False
+            smaller = self.initial_possibilities[g[2], g[3]]
+            smaller[-1] = False
+        print_possibilities(self.initial_possibilities)
