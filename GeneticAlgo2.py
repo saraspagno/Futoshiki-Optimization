@@ -4,9 +4,6 @@ import constants
 from Game import Game
 
 
-# def print_board(board):
-#     print('\n'.join(['\t'.join([str(cell) for cell in j]) for j in board]))
-
 def print_population(population):
     print('Population:')
     for i in range(len(population)):
@@ -63,18 +60,18 @@ class GeneticAlgo2:
             _, counts = np.unique(column, return_counts=True)
             # adding 0 if appears 1, 2 if appears 2, 4 if appears 3, etc.
             for occurrence in counts:
-                # errors += (occurrence - 1) * 2
-                if occurrence != 1:
-                    errors += pow(constants.C, (occurrence - 1))
+                errors += (occurrence - 1)
+                # if occurrence != 1:
+                #     errors += pow(constants.C, (occurrence - 1))
 
         # counting the row constraint
         for row in grid:
             _, counts = np.unique(row, return_counts=True)
             # adding 0 if appears 1, 2 if appears 2, 4 if appears 3, etc.
             for occurrence in counts:
-                # errors += (occurrence - 1) * 2
-                if occurrence != 1:
-                    errors += pow(constants.C, (occurrence - 1))
+                errors += (occurrence - 1)
+                # if occurrence != 1:
+                #     errors += pow(constants.C, (occurrence - 1))
 
         # counting the constant constraint
         for c in self.game.constant_numbers:
@@ -98,14 +95,6 @@ class GeneticAlgo2:
         chosen = np.random.choice(range(len(self.population)), 2, p=normalized)
         return self.population[chosen[0]], self.population[chosen[1]]
 
-    def selection(self):
-        print_population_and_fitness(self.population, self.pop_fitness)
-        indexes = np.argpartition(self.pop_fitness, 2)
-        print(
-            f'Selection, chosen indexes: {indexes[0], indexes[1]}, with weights: {self.pop_fitness[indexes[0]], self.pop_fitness[indexes[1]]}')
-        return self.population[indexes[0]], self.population[indexes[1]]
-
-    # todo: how to implement different dividers? now it's always half
     def cross_over(self, grid1, grid2):
         # cross-over in rows
         if bool(random.getrandbits(1)):
@@ -151,8 +140,6 @@ class GeneticAlgo2:
                 grid[g[1], g[2]] = temp
 
     def start(self):
-        # check = np.array([[3, 5, 1, 4, 2], [5, 4, 1, 2, 3], [4, 5, 2, 3, 1], [5, 1, 3, 2, 4], [2, 3, 4, 1, 5]])
-        # print('Fitness is:', self.fitness(check))
         self.initialize_population()
         iteration = 0
         should_stop = False
@@ -173,14 +160,12 @@ class GeneticAlgo2:
 
             for i in range(int(0.1 * constants.M)):
                 grid = self.population[min_index].copy()
-                self.optimize(grid)
                 new_population.append(grid)
                 new_fitness.append(self.fitness(grid))
             for i in range(int(0.9 * constants.M)):
                 grid1, grid2 = self.selection_with_prob()
                 grid3 = self.cross_over(grid1, grid2)
                 self.mutation(grid3, 0.7)
-                # self.optimize(grid3)
                 new_population.append(grid3)
                 grid3_fitness = self.fitness(grid3)
                 if grid3_fitness == 0:
@@ -195,7 +180,7 @@ class GeneticAlgo2:
             #     new_population.append(copy)
             #     new_fitness.append(self.fitness(copy))
 
-            indexes = random.sample(range(constants.M), 10)
+            indexes = random.sample(range(constants.M), int(0.1 * constants.M))
             for i in indexes:
                 self.mutation(new_population[i], 1)
                 new_fitness[i] = self.fitness(new_population[i])

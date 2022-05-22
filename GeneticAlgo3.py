@@ -4,9 +4,6 @@ import constants
 from Game import Game
 
 
-# def print_board(board):
-#     print('\n'.join(['\t'.join([str(cell) for cell in j]) for j in board]))
-
 def print_population(population):
     print('Population:')
     for i in range(len(population)):

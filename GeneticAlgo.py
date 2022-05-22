@@ -16,7 +16,7 @@ def print_population(population):
 def print_population_and_fitness(population, fitness):
     print('Population:')
     for i in range(len(population)):
-        print(f'{i}: {population[i]}, fitness: {fitness[i]}')
+        print(f'{i}\n: {population[i]}, fitness: {fitness[i]}')
 
 
 class GeneticAlgo:
@@ -25,7 +25,6 @@ class GeneticAlgo:
         self.population = []
         self.pop_fitness = []
         self.counter = 0
-        # print_population(self.population)
 
     def set_constants_in_grid(self, grid):
         for c in self.game.constant_numbers:

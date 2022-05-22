@@ -39,7 +39,7 @@ def parse_args(args_file):
 
 
 if __name__ == '__main__':
-    constant_numbers, greater_constraints = parse_args('args_tests/args4.txt')
+    constant_numbers, greater_constraints = parse_args('args_tests/easy/5x5/args6.txt')
     game = Game(constant_numbers, greater_constraints)
     genetic_algo = GeneticAlgo2(game)
     genetic_algo.start()

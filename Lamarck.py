@@ -3,10 +3,6 @@ import numpy as np
 import constants
 from Game import Game
 
-
-# def print_board(board):
-#     print('\n'.join(['\t'.join([str(cell) for cell in j]) for j in board]))
-
 def print_population(population):
     print('Population:')
     for i in range(len(population)):
@@ -25,7 +21,6 @@ class Lamarck:
         self.population = []
         self.pop_fitness = []
         self.counter = 0
-        # print_population(self.population)
 
     def set_constants_in_grid(self, grid):
         for c in self.game.constant_numbers:
@@ -81,17 +76,8 @@ class Lamarck:
         inverted = np.reciprocal(self.pop_fitness)
         normalized = np.divide(inverted, np.sum(inverted))
         chosen = np.random.choice(range(len(self.population)), 2, p=normalized)
-        # print_population_and_fitness(self.population, self.pop_fitness)
-        # print(f'Selection, chosen indexes: {chosen[0], chosen[1]}, with weights: {self.pop_fitness[chosen[0]], self.pop_fitness[chosen[1]]}')
         return self.population[chosen[0]], self.population[chosen[1]]
 
-    def selection(self):
-        print_population_and_fitness(self.population, self.pop_fitness)
-        indexes = np.argpartition(self.pop_fitness, 2)
-        # print(f'Selection, chosen indexes: {indexes[0], indexes[1]}, with weights: {self.pop_fitness[indexes[0]], self.pop_fitness[indexes[1]]}')
-        return self.population[indexes[0]], self.population[indexes[1]]
-
-    # todo: how to implement different dividers? now it's always half
     def cross_over(self, grid1, grid2):
         divider = random.choice(range(5))
         new_grid = []
@@ -119,7 +105,6 @@ class Lamarck:
                         new_row[random_index] = n
                         filled_indexes.append(random_index)
                 grid[i] = new_row
-            # print('Grid After:', grid)
 
     def replace(self, new_grid):
         new_fitness = self.fitness(new_grid)
@@ -146,7 +131,6 @@ class Lamarck:
                     grid[g[0], g[1]] = grid[g[2], g[3]]
                     grid[g[2], g[3]] = temp
 
-
     def start(self):
         # check = np.array([[3, 5, 1, 4, 2], [5, 4, 1, 2, 3], [4, 5, 2, 3, 1], [5, 1, 3, 2, 4], [2, 3, 4, 1, 5]])
         # print('Fitness is:', self.fitness(check))
@@ -170,32 +154,27 @@ class Lamarck:
 
             for i in range(int(0.1 * constants.M)):
                 grid = self.population[min_index].copy()
-                self.optimize(grid)
                 new_population.append(grid)
                 new_fitness.append(self.fitness(grid))
             for i in range(int(0.7 * constants.M)):
                 grid1, grid2 = self.selection_with_prob()
                 grid3 = self.cross_over(grid1, grid2)
                 self.mutation(grid3, constants.MU)
-                self.optimize(grid3)
                 new_population.append(grid3)
                 grid3_fitness = self.fitness(grid3)
                 if grid3_fitness == 0:
                     print("Found")
                     break
                 new_fitness.append(grid3_fitness)
-
-            for i in range(int(0.2 * constants.M)):
-                copy = new_population[0].copy()
-                self.mutation(copy, 1)
-                self.optimize(copy)
-                new_population.append(copy)
-                new_fitness.append(self.fitness(copy))
-
-            # indexes = random.sample(range(constants.M), 30)
-            # for i in indexes:
-            #     self.mutation(new_population[i])
-            #     new_fitness[i] = self.fitness(new_population[i])
+            # for i in range(int(0.2 * constants.M)):
+            #     copy = new_population[0].copy()
+            #     self.mutation(copy, 1)
+            #     new_population.append(copy)
+            #     new_fitness.append(self.fitness(copy))
+            indexes = random.sample(range(constants.M), int(0.1 * constants.M))
+            for i in indexes:
+                self.mutation(new_population[i], 1)
+                new_fitness[i] = self.fitness(new_population[i])
 
             self.population = np.array(new_population)
             self.pop_fitness = np.array(new_fitness)
