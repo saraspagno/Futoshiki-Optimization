@@ -180,7 +180,7 @@ class GeneticAlgo2:
                 grid1, grid2 = self.selection_with_prob()
                 grid3 = self.cross_over(grid1, grid2)
                 self.mutation(grid3, 0.7)
-                self.optimize(grid3)
+                # self.optimize(grid3)
                 new_population.append(grid3)
                 grid3_fitness = self.fitness(grid3)
                 if grid3_fitness == 0:
@@ -195,10 +195,10 @@ class GeneticAlgo2:
             #     new_population.append(copy)
             #     new_fitness.append(self.fitness(copy))
 
-            # indexes = random.sample(range(constants.M), 30)
-            # for i in indexes:
-            #     self.mutation(new_population[i], 1)
-            #     new_fitness[i] = self.fitness(new_population[i])
+            indexes = random.sample(range(constants.M), 10)
+            for i in indexes:
+                self.mutation(new_population[i], 1)
+                new_fitness[i] = self.fitness(new_population[i])
 
             self.population = np.array(new_population)
             self.pop_fitness = np.array(new_fitness)

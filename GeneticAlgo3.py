@@ -104,10 +104,6 @@ class GeneticAlgo3:
     def mutation(self, grid, prob):
         do = random.random() < prob
         if do:
-            # print('Mutation is happening!!')
-            # print('Grid Before:', grid)
-            # to_change = len(grid) // 2
-            # to_change = 3
             to_change = random.choice(range(1, constants.N + 1))
             random_row_indexes = random.sample(range(constants.N), to_change)
             for i in random_row_indexes:
@@ -122,7 +118,6 @@ class GeneticAlgo3:
                         new_row[random_index] = n
                         filled_indexes.append(random_index)
                 grid[i] = new_row
-            # print('Grid After:', grid)
 
     def replace(self, new_grid):
         new_fitness = self.fitness(new_grid)
@@ -142,8 +137,6 @@ class GeneticAlgo3:
         return False
 
     def start(self):
-        # check = np.array([[3, 5, 1, 4, 2], [5, 4, 1, 2, 3], [4, 5, 2, 3, 1], [5, 1, 3, 2, 4], [2, 3, 4, 1, 5]])
-        # print('Fitness is:', self.fitness(check))
         self.initialize_population()
         iteration = 0
         should_stop = False
@@ -181,11 +174,6 @@ class GeneticAlgo3:
                 self.mutation(copy, 1)
                 new_population.append(copy)
                 new_fitness.append(self.fitness(copy))
-
-            # indexes = random.sample(range(constants.M), 30)
-            # for i in indexes:
-            #     self.mutation(new_population[i])
-            #     new_fitness[i] = self.fitness(new_population[i])
 
             self.population = np.array(new_population)
             self.pop_fitness = np.array(new_fitness)
