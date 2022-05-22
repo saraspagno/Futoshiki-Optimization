@@ -4,21 +4,6 @@ import constants
 from Game import Game
 
 
-# def print_board(board):
-#     print('\n'.join(['\t'.join([str(cell) for cell in j]) for j in board]))
-
-def print_population(population):
-    print('Population:')
-    for i in range(len(population)):
-        print(f'{i}: {population[i]}')
-
-
-def print_population_and_fitness(population, fitness):
-    print('Population:')
-    for i in range(len(population)):
-        print(f'{i}\n: {population[i]}, fitness: {fitness[i]}')
-
-
 class GeneticAlgo:
     def __init__(self, game: Game):
         self.game = game
@@ -73,19 +58,17 @@ class GeneticAlgo:
             self.population.append(self.create_random_grid())
             fitness_value = self.fitness(self.population[i])
             self.pop_fitness.append(float(fitness_value))
-        print_population_and_fitness(self.population, self.pop_fitness)
+        constants.print_population_and_fitness(self.population, self.pop_fitness)
 
     def selection_with_prob(self):
         inverted = np.reciprocal(self.pop_fitness)
         normalized = np.divide(inverted, np.sum(inverted))
         chosen = np.random.choice(range(len(self.population)), 2, p=normalized)
-        print_population_and_fitness(self.population, self.pop_fitness)
         print(
             f'Selection, chosen indexes: {chosen[0], chosen[1]}, with weights: {self.pop_fitness[chosen[0]], self.pop_fitness[chosen[1]]}')
         return self.population[chosen[0]], self.population[chosen[1]]
 
     def selection(self):
-        print_population_and_fitness(self.population, self.pop_fitness)
         indexes = np.argpartition(self.pop_fitness, 2)
         print(
             f'Selection, chosen indexes: {indexes[0], indexes[1]}, with weights: {self.pop_fitness[indexes[0]], self.pop_fitness[indexes[1]]}')

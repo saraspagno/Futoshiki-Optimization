@@ -3,17 +3,6 @@ import numpy as np
 import constants
 from Game import Game
 
-def print_population(population):
-    print('Population:')
-    for i in range(len(population)):
-        print(f'{i}: {population[i]}')
-
-
-def print_population_and_fitness(population, fitness):
-    print('Population:')
-    for i in range(len(population)):
-        print(f'{i}: {population[i]}, fitness: {fitness[i]}')
-
 
 class Lamarck:
     def __init__(self, game: Game):
@@ -70,7 +59,7 @@ class Lamarck:
             self.population.append(self.create_random_grid())
             fitness_value = self.fitness(self.population[i])
             self.pop_fitness.append(float(fitness_value))
-        print_population_and_fitness(self.population, self.pop_fitness)
+        constants.print_population_and_fitness(self.population, self.pop_fitness)
 
     def selection_with_prob(self):
         inverted = np.reciprocal(self.pop_fitness)
@@ -132,8 +121,6 @@ class Lamarck:
                     grid[g[2], g[3]] = temp
 
     def start(self):
-        # check = np.array([[3, 5, 1, 4, 2], [5, 4, 1, 2, 3], [4, 5, 2, 3, 1], [5, 1, 3, 2, 4], [2, 3, 4, 1, 5]])
-        # print('Fitness is:', self.fitness(check))
         self.initialize_population()
         iteration = 0
         should_stop = False
@@ -141,7 +128,7 @@ class Lamarck:
             print(f'\n\n\nITERATION N.{iteration}')
             iteration += 1
             print('Counter: ', self.counter)
-            print_population_and_fitness(self.population, self.pop_fitness)
+            constants.print_population_and_fitness(self.population, self.pop_fitness)
 
             new_population = []
             new_fitness = []
