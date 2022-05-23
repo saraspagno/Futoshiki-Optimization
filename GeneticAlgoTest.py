@@ -4,7 +4,7 @@ import constants
 from Game import Game
 
 
-class GeneticAlgo3:
+class GeneticAlgo:
     def __init__(self, game: Game):
         self.game = game
         self.population = []
@@ -23,16 +23,9 @@ class GeneticAlgo3:
         # for each row
         for i in range(constants.N):
             filled_indexes = self.game.taken_indexes_by_row[i].copy()
-            for value in [5, 1, 2, 3, 4]:
+            for value in range(1, constants.N + 1):
                 if value not in self.game.taken_values_by_row[i]:
-                    if value == constants.N:
-                        possible_indexes = [x for x in row_values if x not in (
-                                filled_indexes + self.game.smaller_by_row[i])]
-                    elif value == 1:
-                        possible_indexes = [x for x in row_values if x not in (
-                                filled_indexes + self.game.greater_by_row[i])]
-                    else:
-                        possible_indexes = [x for x in row_values if x not in filled_indexes]
+                    possible_indexes = [x for x in row_values if x not in filled_indexes]
                     random_index = random.choice(possible_indexes)
                     grid[i][random_index] = value
                     filled_indexes.append(random_index)
@@ -57,13 +50,10 @@ class GeneticAlgo3:
                 # errors += (occurrence - 1) * 2
                 if occurrence != 1:
                     errors += pow(constants.C, (occurrence - 1))
-
-        return float(errors)
+        return errors
 
     # function to create M random grids
     def initialize_population(self):
-        self.population = []
-        self.pop_fitness = []
         for i in range(constants.M):
             self.population.append(self.create_random_grid())
             fitness_value = self.fitness(self.population[i])
@@ -74,9 +64,20 @@ class GeneticAlgo3:
         inverted = np.reciprocal(self.pop_fitness)
         normalized = np.divide(inverted, np.sum(inverted))
         chosen = np.random.choice(range(len(self.population)), 2, p=normalized)
+        print(
+            f'Selection, chosen indexes: {chosen[0], chosen[1]}, with weights: {self.pop_fitness[chosen[0]], self.pop_fitness[chosen[1]]}')
         return self.population[chosen[0]], self.population[chosen[1]]
 
+    def selection(self):
+        indexes = np.argpartition(self.pop_fitness, 2)
+        print(
+            f'Selection, chosen indexes: {indexes[0], indexes[1]}, with weights: {self.pop_fitness[indexes[0]], self.pop_fitness[indexes[1]]}')
+        return self.population[indexes[0]], self.population[indexes[1]]
+
+    # todo: how to implement different dividers? now it's always half
     def cross_over(self, grid1, grid2):
+        # divider = len(grid1) // 2
+        # divider = 1
         divider = random.choice(range(5))
         new_grid = []
         for x in grid1[:divider]:
@@ -85,31 +86,26 @@ class GeneticAlgo3:
             new_grid.append(x.tolist())
         return np.array(new_grid)
 
-    def mutation(self, grid, prob):
-        do = random.random() < prob
+    def mutation(self, grid):
+        do = random.random() < constants.MU
         if do:
-            row_values = range(constants.N)
-            to_change = random.choice(range(1, constants.N + 1))
+            print('Mutation is happening!!')
+            print('Grid Before:', grid)
+            to_change = len(grid) // 2
             random_row_indexes = random.sample(range(constants.N), to_change)
             for i in random_row_indexes:
                 new_row = [0 for i in range(constants.N)]
                 for j, v in zip(self.game.taken_indexes_by_row[i], self.game.taken_values_by_row[i]):
                     new_row[j] = v
                 filled_indexes = self.game.taken_indexes_by_row[i].copy()
-                for value in [5, 1, 2, 3, 4]:
-                    if value not in self.game.taken_values_by_row[i]:
-                        if value == constants.N:
-                            possible_indexes = [x for x in row_values if x not in (
-                                    filled_indexes + self.game.smaller_by_row[i])]
-                        elif value == 1:
-                            possible_indexes = [x for x in row_values if x not in (
-                                    filled_indexes + self.game.greater_by_row[i])]
-                        else:
-                            possible_indexes = [x for x in row_values if x not in filled_indexes]
+                for n in range(1, constants.N + 1):
+                    if n not in self.game.taken_values_by_row[i]:
+                        possible_indexes = [x for x in range(constants.N) if x not in filled_indexes]
                         random_index = random.choice(possible_indexes)
-                        new_row[random_index] = value
+                        new_row[random_index] = n
                         filled_indexes.append(random_index)
                 grid[i] = new_row
+            print('Grid After:', grid)
 
     def replace(self, new_grid):
         new_fitness = self.fitness(new_grid)
@@ -128,56 +124,22 @@ class GeneticAlgo3:
         self.pop_fitness[worst_index] = float(new_fitness)
         return False
 
+    # def stop_algo(self):
+    #     min_fitness = np.min(self.pop_fitness)
+    #     print('Iteration min:', min_fitness)
+    #     max_fitness = np.max(self.pop_fitness)
+    #     print('Compare:', min_fitness, max_fitness)
+    #     return min_fitness == 0
+
     def start(self):
         self.initialize_population()
         iteration = 0
-        restarts = 0
         should_stop = False
         while not should_stop:
-            if iteration == 500:
-                print(f'\n\n\nRESTARTING FOR N.{restarts}')
-                iteration = 0
-                restarts += 1
-                self.initialize_population()
-
             print(f'\n\n\nITERATION N.{iteration}')
-            iteration += 1
             print('Counter: ', self.counter)
-            constants.print_population_and_fitness(self.population, self.pop_fitness)
-
-            new_population = []
-            new_fitness = []
-
-            min_index = np.argmin(self.pop_fitness)
-            min_fitness = self.pop_fitness[min_index]
-            print('Min is: ', min_fitness)
-            if min_fitness == 0:
-                break
-
-            for i in range(int(0.1 * constants.M)):
-                new_population.append(self.population[min_index].copy())
-                new_fitness.append(self.pop_fitness[min_index])
-            for i in range(int(0.9 * constants.M)):
-                grid1, grid2 = self.selection_with_prob()
-                grid3 = self.cross_over(grid1, grid2)
-                self.mutation(grid3, constants.MU)
-                new_population.append(grid3)
-                grid3_fitness = self.fitness(grid3)
-                if grid3_fitness == 0:
-                    print("Found")
-                    print(grid3)
-                    return
-                new_fitness.append(grid3_fitness)
-
-            # for i in range(int(0.2 * constants.M)):
-            #     copy = new_population[0].copy()
-            #     self.mutation(copy, 1)
-            #     new_population.append(copy)
-            #     new_fitness.append(self.fitness(copy))
-            indexes = random.sample(range(constants.M), int(0.2 * constants.M))
-            for i in indexes:
-                self.mutation(new_population[i], 1)
-                new_fitness[i] = self.fitness(new_population[i])
-
-            self.population = np.array(new_population)
-            self.pop_fitness = np.array(new_fitness)
+            iteration += 1
+            grid1, grid2 = self.selection_with_prob()
+            grid3 = self.cross_over(grid1, grid2)
+            self.mutation(grid3)
+            should_stop = self.replace(grid3)

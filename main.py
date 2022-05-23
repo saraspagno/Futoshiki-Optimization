@@ -1,10 +1,7 @@
 import constants
 
 from Game import Game
-from GeneticAlgo import GeneticAlgo
-from GeneticAlgo2 import GeneticAlgo2
-from GeneticAlgo3 import GeneticAlgo3
-from Lamarck import Lamarck
+from GeneticAlgo import GeneticAlgo3
 
 
 def parse_args(args_file):
@@ -34,13 +31,11 @@ def parse_args(args_file):
 
     print('Constant Numbers: ', constant_numbers)
     print('Greater Constraints: ', greater_constraints)
-
     return constant_numbers, greater_constraints
 
 
 if __name__ == '__main__':
-    constant_numbers, greater_constraints = parse_args('args_tests/easy/5x5/args4.txt')
+    constant_numbers, greater_constraints = parse_args('args_tests/easy/5x5/args9.txt')
     game = Game(constant_numbers, greater_constraints)
     genetic_algo = GeneticAlgo3(game)
     genetic_algo.start()
-

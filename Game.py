@@ -1,6 +1,4 @@
 import numpy as np
-import random
-
 import constants
 
 
@@ -12,7 +10,16 @@ def print_possibilities(possibilities):
 
 
 class Game:
-    def __init__(self, constant_numbers: list, constraints):
+    """
+    this class precedes the Genetic Algorithm and creates the parses the args into variables for the game.
+    """
+    def __init__(self, constant_numbers, constraints):
+        """
+        this method init the Game class
+        :param self: self of class
+        :param constant_numbers: the constant number given as args
+        :param constraints: the greater/smaller constraints given as args
+        """
         self.constraints = constraints
         self.constant_numbers = constant_numbers
         self.taken_indexes_by_row = [[] for i in range(constants.N)]
@@ -32,16 +39,26 @@ class Game:
             self.smaller_by_row[g[2]].append(g[3])
 
     def pencil_init(self):
+        """
+        this method attempts to add as many constants as possible to the given
+        there are some rules which allow us to 'pencil' mark the board and fill it to begin with
+        :param self: self of class
+        :return: none
+        """
         print_possibilities(self.initial_possibilities)
-        # update constants
-        self.initialize_constants()
-        self.initialize_greater()
+        self.apply_constants()
+        self.apply_greater()
         is_done = False
         while not is_done:
-            self.initialize_constants()
+            self.apply_constants()
             is_done = self.update_constants()
 
     def update_constants(self):
+        """
+        this method updates the constants in the game
+        :param self: self of class
+        :return: none
+        """
         print('Update constants')
         is_done = True
         # for each element in each row:
@@ -69,7 +86,12 @@ class Game:
         print_possibilities(self.initial_possibilities)
         return is_done
 
-    def initialize_constants(self):
+    def apply_constants(self):
+        """
+        this method apply the constants constraints for the pencil mark
+        :param self: self of class
+        :return: none
+        """
         print('Constants')
         # 1. put all constant numbers
         for c in self.constant_numbers:
@@ -100,7 +122,12 @@ class Game:
                             greater[i] = False
         print_possibilities(self.initial_possibilities)
 
-    def initialize_greater(self):
+    def apply_greater(self):
+        """
+        this method apply the constants smaller/greater constraint for the pencil mark
+        :param self: self of class
+        :return: none
+        """
         print('Greater')
         for g in self.constraints:
             greater = self.initial_possibilities[g[0], g[1]]
