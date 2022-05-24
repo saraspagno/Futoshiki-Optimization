@@ -31,13 +31,11 @@ def parse_args(args_file):
 
     print('Constant Numbers: ', constant_numbers)
     print('Greater Constraints: ', greater_constraints)
-
     return constant_numbers, greater_constraints
 
 
 if __name__ == '__main__':
-    constant_numbers, greater_constraints = parse_args('args.txt')
+    constant_numbers, greater_constraints = parse_args('args_tests/easy/6x6/args3.txt')
     game = Game(constant_numbers, greater_constraints)
-    genetic_algo = GeneticAlgo(game)
-    genetic_algo.start()
-
+    # genetic_algo = GeneticAlgo(game)
+    # genetic_algo.start()
