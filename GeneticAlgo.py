@@ -4,7 +4,7 @@ import constants
 from Game import Game
 
 
-class GeneticAlgo3:
+class GeneticAlgo:
     """
     this class represents a standard genetic algorithm
     """
@@ -29,12 +29,14 @@ class GeneticAlgo3:
         """
         grid = np.array([[0 for i in range(constants.N)] for j in range(constants.N)])
         row_values = [i for i in range(constants.N)]
+        values = [constants.N, 1]
+        values.extend(range(2, constants.N))
         for c in self.game.constant_numbers:
             grid[c[0], c[1]] = c[2]
         # for each row
         for i in range(constants.N):
             filled_indexes = self.game.taken_indexes_by_row[i].copy()
-            for value in [5, 1, 2, 3, 4]:
+            for value in values:
                 if value not in self.game.taken_values_by_row[i]:
                     if value == constants.N:
                         possible_indexes = [x for x in row_values if x not in (
@@ -131,12 +133,14 @@ class GeneticAlgo3:
             row_values = range(constants.N)
             to_change = random.choice(range(1, constants.N + 1))
             random_row_indexes = random.sample(range(constants.N), to_change)
+            values = [constants.N, 1]
+            values.extend(range(2, constants.N))
             for i in random_row_indexes:
                 new_row = [0 for i in range(constants.N)]
                 for j, v in zip(self.game.taken_indexes_by_row[i], self.game.taken_values_by_row[i]):
                     new_row[j] = v
                 filled_indexes = self.game.taken_indexes_by_row[i].copy()
-                for value in [5, 1, 2, 3, 4]:
+                for value in values:
                     if value not in self.game.taken_values_by_row[i]:
                         if value == constants.N:
                             possible_indexes = [x for x in row_values if x not in (
@@ -160,7 +164,7 @@ class GeneticAlgo3:
         self.initialize_population()
         iteration, restarts = 0, 0
         while restarts < constants.MAX_RESTARTS:
-            if iteration == constants.MAX_ITERATIONS:
+            if iteration == constants.MAX_ITERATIONS_EASY_6x6:
                 print(f'\n\n\nRESTARTING FOR N.{restarts}')
                 iteration = 0
                 restarts += 1
@@ -194,6 +198,9 @@ class GeneticAlgo3:
             for i in indexes:
                 self.mutation(new_population[i], 1)
                 new_fitness[i] = self.fitness(new_population[i])
+                if new_fitness[i] == 0:
+                    print("Found", new_population[i])
+                    return
 
             self.population = np.array(new_population)
             self.pop_fitness = np.array(new_fitness)

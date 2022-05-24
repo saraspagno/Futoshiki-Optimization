@@ -13,6 +13,7 @@ class Game:
     """
     this class precedes the Genetic Algorithm and creates the parses the args into variables for the game.
     """
+
     def __init__(self, constant_numbers, constraints):
         """
         this method init the Game class
@@ -30,6 +31,7 @@ class Game:
                                                range(constants.N)])
 
         self.pencil_init()
+        print(self.constant_numbers)
         for c in self.constant_numbers:
             self.taken_indexes_by_row[c[0]].append(c[1])
             self.taken_values_by_row[c[0]].append(c[2])
@@ -61,7 +63,7 @@ class Game:
         """
         print('Update constants')
         is_done = True
-        # for each element in each row:
+        # for each singular element in board:
         for i, row in enumerate(self.initial_possibilities):
             for j, element in enumerate(row):
                 # if there is only one true
@@ -72,7 +74,18 @@ class Game:
                     if [i, j, index + 1] not in self.constant_numbers:
                         self.constant_numbers.append([i, j, index + 1])
                         is_done = False
-        # for each element in each column:
+        # for each row
+        for i, row in enumerate(self.initial_possibilities):
+            for j, element in enumerate(row.T):
+                # if there is only one true
+                if sum(element) == 1:
+                    # get index of true
+                    index = np.where(element == True)[0][0]
+                    # check if not already in constants
+                    if [i, index, j + 1] not in self.constant_numbers:
+                        self.constant_numbers.append([i, index, j + 1])
+                        is_done = False
+        # for each column
         for i, column in enumerate(self.initial_possibilities.T):
             for j, element in enumerate(column):
                 # if there is only one true
@@ -107,14 +120,12 @@ class Game:
                     current[i] = False
             for g in self.constraints:
                 if g[0] == c[0] and g[1] == c[1]:
-                    print('inside smaller')
                     # go to smaller and remove all great or equal
                     smaller = self.initial_possibilities[g[2]][g[3]]
                     for i in range(len(smaller)):
                         if i > index:
                             smaller[i] = False
                 if g[2] == c[0] and g[3] == c[1]:
-                    print('inside greater')
                     # go to smaller and remove all great or equal
                     greater = self.initial_possibilities[g[0]][g[1]]
                     for i in range(len(greater)):
@@ -130,8 +141,29 @@ class Game:
         """
         print('Greater')
         for g in self.constraints:
-            greater = self.initial_possibilities[g[0], g[1]]
-            greater[0] = False
-            smaller = self.initial_possibilities[g[2], g[3]]
-            smaller[-1] = False
+            chain = [g]
+            current = g
+            chain_is_over = False
+            while not chain_is_over:
+                chain_is_over = True
+                for c in self.constraints:
+                    if current[2] == c[0] and current[3] == c[1]:
+                        current = c
+                        chain.append(current)
+                        chain_is_over = False
+                        break
+            # to_change = constants.N - len(chain)
+            for index, el in enumerate(chain):
+                greater = self.initial_possibilities[el[0], el[1]]
+                for i in range(len(chain) - index):
+                    greater[i] = False
+                smaller = self.initial_possibilities[el[2], el[3]]
+                for i in range(constants.N - index - 1, constants.N):
+                    smaller[i] = False
+
+        # for g in self.constraints:
+        #     greater = self.initial_possibilities[g[0], g[1]]
+        #     greater[0] = False
+        #     smaller = self.initial_possibilities[g[2], g[3]]
+        #     smaller[-1] = False
         print_possibilities(self.initial_possibilities)
