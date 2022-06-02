@@ -8,9 +8,9 @@ MU = 0.5  # mutation probability
 STOP = 2  # after how many equal iterations to stop
 
 MAX_ITERATIONS_EASY_5x5 = 500
-MAX_ITERATIONS_EASY_6x6 = 1000
+MAX_ITERATIONS_EASY_6x6 = 100
 
-MAX_RESTARTS = 15
+MAX_RESTARTS = 30
 COPY_RATE = int(0.1 * M)
 SELECTION_RATE = int(M - COPY_RATE)
 MUTATION_RATE = int(0.2 * M)

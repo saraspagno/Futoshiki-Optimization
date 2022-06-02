@@ -1,7 +1,10 @@
+import numpy as np
+
 import constants
 
 from Game import Game
 from GeneticAlgo import GeneticAlgo
+from GeneticAlgoTest3 import GeneticAlgoTest3
 
 
 def parse_args(args_file):
@@ -35,7 +38,18 @@ def parse_args(args_file):
 
 
 if __name__ == '__main__':
-    constant_numbers, greater_constraints = parse_args('args_tests/easy/6x6/args3.txt')
+    constant_numbers, greater_constraints = parse_args('args_tests/easy/6x6/args1.txt')
     game = Game(constant_numbers, greater_constraints)
-    # genetic_algo = GeneticAlgo(game)
-    # genetic_algo.start()
+    genetic_algo = GeneticAlgoTest3(game)
+    genetic_algo.start()
+    # a = np.array([2, 2, 5, 5, 1])
+    # a2, count = np.unique(a, return_counts=True)
+    # print(a2)
+    # print(count)
+    # for i, oc in enumerate(count):
+    #     if oc > 1:
+    #         indexes = np.where(a2[i] == a)[0]
+    #         print(f'Value is: {a2[i]}, indexes are: {indexes}')
+
+
+

@@ -1,11 +1,18 @@
 import numpy as np
 import constants
+import itertools
 
 
 def print_possibilities(possibilities):
     for i in possibilities:
         line_list = i.tolist()
         print(line_list)
+    print('\n')
+
+
+def print_possibilities2(possibilities):
+    for i in possibilities:
+        print(i)
     print('\n')
 
 
@@ -23,22 +30,37 @@ class Game:
         """
         self.constraints = constraints
         self.constant_numbers = constant_numbers
-        self.taken_indexes_by_row = [[] for i in range(constants.N)]
-        self.taken_values_by_row = [[] for i in range(constants.N)]
-        self.greater_by_row = [[] for i in range(constants.N)]
-        self.smaller_by_row = [[] for i in range(constants.N)]
-        self.initial_possibilities = np.array([[[True for i in range(constants.N)] for i in range(constants.N)] for i in
-                                               range(constants.N)])
+        self.initial_possibilities = np.array(
+            [[[True for i in range(constants.N)] for i in range(constants.N)] for i in range(constants.N)])
+        self.row_possibilities = [[] for i in range(constants.N)]
+        self.row_greater = [[] for i in range(constants.N)]
+
+        for g in self.constraints:
+            if g[0] == g[2]:
+                self.row_greater[g[0]].append(g)
 
         self.pencil_init()
         print(self.constant_numbers)
-        for c in self.constant_numbers:
-            self.taken_indexes_by_row[c[0]].append(c[1])
-            self.taken_values_by_row[c[0]].append(c[2])
+        self.rows_init()
+        print_possibilities2(self.row_possibilities)
 
-        for g in self.constraints:
-            self.greater_by_row[g[0]].append(g[1])
-            self.smaller_by_row[g[2]].append(g[3])
+    def rows_init(self):
+        permutations = list(itertools.permutations([i for i in range(1, constants.N + 1)]))
+        for i, row in enumerate(self.initial_possibilities):
+            for perm in permutations:
+                perm = list(perm)
+                should_append = True
+                for index, value in enumerate(perm):
+                    index_list = row[index]
+                    if not index_list[value - 1]:
+                        should_append = False
+                        break
+                constraints = self.row_greater[i]
+                for c in constraints:
+                    if perm[c[1]] < perm[c[3]]:
+                        should_append = False
+                if should_append:
+                    self.row_possibilities[i].append(perm)
 
     def pencil_init(self):
         """
