@@ -1,10 +1,12 @@
+import abc
+from abc import ABC, abstractmethod
 import random
 import numpy as np
 import constants
 from Game import Game
 
 
-class GeneticAlgo:
+class GeneticAlgo(ABC):
     """
     this class represents a standard genetic algorithm
     """
@@ -28,27 +30,10 @@ class GeneticAlgo:
         :return: the create grid
         """
         grid = np.array([[0 for i in range(constants.N)] for j in range(constants.N)])
-        row_values = [i for i in range(constants.N)]
-        values = [constants.N, 1]
-        values.extend(range(2, constants.N))
-        for c in self.game.constant_numbers:
-            grid[c[0], c[1]] = c[2]
         # for each row
-        for i in range(constants.N):
-            filled_indexes = self.game.taken_indexes_by_row[i].copy()
-            for value in values:
-                if value not in self.game.taken_values_by_row[i]:
-                    if value == constants.N:
-                        possible_indexes = [x for x in row_values if x not in (
-                                filled_indexes + self.game.smaller_by_row[i])]
-                    elif value == 1:
-                        possible_indexes = [x for x in row_values if x not in (
-                                filled_indexes + self.game.greater_by_row[i])]
-                    else:
-                        possible_indexes = [x for x in row_values if x not in filled_indexes]
-                    random_index = random.choice(possible_indexes)
-                    grid[i][random_index] = value
-                    filled_indexes.append(random_index)
+        for i, row in enumerate(grid):
+            row = random.choice(self.game.row_possibilities[i])
+            grid[i] = row
         return grid
 
     # function to receive a grid and return a score (the highest fitness -> worst board)
@@ -73,10 +58,9 @@ class GeneticAlgo:
             _, counts = np.unique(column, return_counts=True)
             # adding 0 if appears 1, 2 if appears 2, 4 if appears 3, etc.
             for occurrence in counts:
-                # errors += (occurrence - 1) * 2
-                if occurrence != 1:
-                    errors += pow(constants.C, (occurrence - 1))
-
+                errors += (occurrence - 1)
+                # if occurrence != 1:
+                #     errors += pow(constants.C, (occurrence - 1))
         return float(errors)
 
     def initialize_population(self):
@@ -130,30 +114,32 @@ class GeneticAlgo:
         """
         do = random.random() < prob
         if do:
-            row_values = range(constants.N)
             to_change = random.choice(range(1, constants.N + 1))
             random_row_indexes = random.sample(range(constants.N), to_change)
-            values = [constants.N, 1]
-            values.extend(range(2, constants.N))
             for i in random_row_indexes:
-                new_row = [0 for i in range(constants.N)]
-                for j, v in zip(self.game.taken_indexes_by_row[i], self.game.taken_values_by_row[i]):
-                    new_row[j] = v
-                filled_indexes = self.game.taken_indexes_by_row[i].copy()
-                for value in values:
-                    if value not in self.game.taken_values_by_row[i]:
-                        if value == constants.N:
-                            possible_indexes = [x for x in row_values if x not in (
-                                    filled_indexes + self.game.smaller_by_row[i])]
-                        elif value == 1:
-                            possible_indexes = [x for x in row_values if x not in (
-                                    filled_indexes + self.game.greater_by_row[i])]
-                        else:
-                            possible_indexes = [x for x in row_values if x not in filled_indexes]
-                        random_index = random.choice(possible_indexes)
-                        new_row[random_index] = value
-                        filled_indexes.append(random_index)
+                new_row = random.choice(self.game.row_possibilities[i])
                 grid[i] = new_row
+        return grid
+
+    def optimize(self, grid):
+        """
+        this method locally optimizes one grid by replacing rows that have same values in columns
+        :param self: self of class
+        :param grid: the grid to optimize
+        :return: the optimized grid
+        """
+        grid = grid.copy()
+        for i in range(int(constants.N / 2)):
+            for column in grid.T:
+                a, counts = np.unique(column, return_counts=True)
+                for i, occurrence in enumerate(counts):
+                    if occurrence > 1:
+                        indexes = np.where(a[i] == column)[0]
+                        for j in indexes:
+                            row = random.choice(self.game.row_possibilities[j])
+                            grid[j] = row
+                        break
+            return grid
 
     def start(self):
         """
@@ -161,47 +147,4 @@ class GeneticAlgo:
         :param self: - self of class
         :return: none
         """
-        self.initialize_population()
-        iteration, restarts = 0, 0
-        while restarts < constants.MAX_RESTARTS:
-            if iteration == constants.MAX_ITERATIONS_EASY_6x6:
-                print(f'\n\n\nRESTARTING FOR N.{restarts}')
-                iteration = 0
-                restarts += 1
-                self.initialize_population()
-
-            print(f'\n\n\nITERATION N.{iteration}')
-            constants.print_population_and_fitness(self.population, self.pop_fitness)
-            iteration += 1
-
-            new_population = []
-            new_fitness = []
-
-            min_index = np.argmin(self.pop_fitness)
-            min_fitness = self.pop_fitness[min_index]
-            print('Min is: ', min_fitness)
-
-            for i in range(constants.COPY_RATE):
-                new_population.append(self.population[min_index].copy())
-                new_fitness.append(self.pop_fitness[min_index])
-            for i in range(constants.SELECTION_RATE):
-                grid1, grid2 = self.selection_with_prob()
-                grid3 = self.cross_over(grid1, grid2)
-                self.mutation(grid3, constants.MU)
-                new_population.append(grid3)
-                grid3_fitness = self.fitness(grid3)
-                if grid3_fitness == 0:
-                    print("Found", grid3)
-                    return
-                new_fitness.append(grid3_fitness)
-            indexes = random.sample(range(constants.M), constants.MUTATION_RATE)
-            for i in indexes:
-                self.mutation(new_population[i], 1)
-                new_fitness[i] = self.fitness(new_population[i])
-                if new_fitness[i] == 0:
-                    print("Found", new_population[i])
-                    return
-
-            self.population = np.array(new_population)
-            self.pop_fitness = np.array(new_fitness)
-        print('Program finished solution not found.')
+        pass

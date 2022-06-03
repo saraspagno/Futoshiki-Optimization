@@ -69,7 +69,7 @@ class Game:
         :param self: self of class
         :return: none
         """
-        print_possibilities(self.initial_possibilities)
+        # print_possibilities(self.initial_possibilities)
         self.apply_constants()
         self.apply_greater()
         is_done = False
@@ -83,7 +83,7 @@ class Game:
         :param self: self of class
         :return: none
         """
-        print('Update constants')
+        # print('Update constants')
         is_done = True
         # for each singular element in board:
         for i, row in enumerate(self.initial_possibilities):
@@ -118,7 +118,7 @@ class Game:
                     if [index, j, i + 1] not in self.constant_numbers:
                         self.constant_numbers.append([index, j, i + 1])
                         is_done = False
-        print_possibilities(self.initial_possibilities)
+        # print_possibilities(self.initial_possibilities)
         return is_done
 
     def apply_constants(self):
@@ -127,7 +127,7 @@ class Game:
         :param self: self of class
         :return: none
         """
-        print('Constants')
+        # print('Constants')
         # 1. put all constant numbers
         for c in self.constant_numbers:
             index = c[2] - 1
@@ -153,7 +153,7 @@ class Game:
                     for i in range(len(greater)):
                         if i < index:
                             greater[i] = False
-        print_possibilities(self.initial_possibilities)
+        # print_possibilities(self.initial_possibilities)
 
     def apply_greater(self):
         """
@@ -161,7 +161,7 @@ class Game:
         :param self: self of class
         :return: none
         """
-        print('Greater')
+        # print('Greater')
         for g in self.constraints:
             chain = [g]
             current = g
@@ -183,9 +183,4 @@ class Game:
                 for i in range(constants.N - index - 1, constants.N):
                     smaller[i] = False
 
-        # for g in self.constraints:
-        #     greater = self.initial_possibilities[g[0], g[1]]
-        #     greater[0] = False
-        #     smaller = self.initial_possibilities[g[2], g[3]]
-        #     smaller[-1] = False
-        print_possibilities(self.initial_possibilities)
+        # print_possibilities(self.initial_possibilities)
