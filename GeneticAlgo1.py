@@ -19,7 +19,7 @@ class GeneticAlgo1(GeneticAlgo):
         iteration, restarts = 1, 0
         average, minimum = [], []
         while restarts < constants.MAX_RESTARTS:
-            if iteration == constants.MAX_ITERATIONS_EASY_6x6:
+            if iteration == constants.MAX_ITERATIONS:
                 print(f'\n\n\nRESTARTING FOR N.{restarts}')
                 iteration = 1
                 restarts += 1

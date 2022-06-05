@@ -39,8 +39,6 @@ def parse_args(args_file):
         line_values = [i - 1 for i in list(map(int, lines[index].split(' ')))]
         greater_constraints.append(line_values)
 
-    print('Constant Numbers: ', constant_numbers)
-    print('Greater Constraints: ', greater_constraints)
     return constant_numbers, greater_constraints
 
 
@@ -101,28 +99,27 @@ if __name__ == '__main__':
     time.sleep(2)
 
     # Standard Version
-    print('Starting Standard version')
+    print('\n\nStarting Standard version')
     time.sleep(2)
-    constant_numbers, greater_constraints = parse_args(sys.argv[0])
+    constant_numbers, greater_constraints = parse_args(sys.argv[1])
     game = Game(constant_numbers, greater_constraints)
     genetic_algo = GeneticAlgo1(game)
     genetic_algo.start()
     time.sleep(10)
 
     # Darwinian Version
-    print('Starting Darwinian version')
+    print('\n\nStarting Darwinian version')
     time.sleep(2)
-    constant_numbers, greater_constraints = parse_args(sys.argv[0])
+    constant_numbers, greater_constraints = parse_args(sys.argv[1])
     game = Game(constant_numbers, greater_constraints)
     genetic_algo = GeneticAlgo2(game)
     genetic_algo.start()
     time.sleep(10)
 
     # Lamarck Version
-    print('Starting Lamarck version')
+    print('\n\nStarting Lamarck version')
     time.sleep(2)
-    constant_numbers, greater_constraints = parse_args(sys.argv[0])
+    constant_numbers, greater_constraints = parse_args(sys.argv[1])
     game = Game(constant_numbers, greater_constraints)
     genetic_algo = GeneticAlgo3(game)
     genetic_algo.start()
-    time.sleep(10)

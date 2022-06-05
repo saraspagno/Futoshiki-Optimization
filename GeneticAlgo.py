@@ -75,7 +75,6 @@ class GeneticAlgo(ABC):
             self.population.append(self.create_random_grid())
             fitness_value = self.fitness(self.population[i])
             self.pop_fitness.append(float(fitness_value))
-        constants.print_population_and_fitness(self.population, self.pop_fitness)
 
     def selection_with_prob(self):
         """
