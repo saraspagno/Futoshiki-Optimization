@@ -141,6 +141,22 @@ class GeneticAlgo(ABC):
                         break
             return grid
 
+    def get_average(self):
+        """
+        this method returns the average fitness for an iteration
+        :param self: - self of class
+        :return: average
+        """
+        return sum(self.pop_fitness) / len(self.pop_fitness)
+
+    def get_minimum(self):
+        """
+       this method returns the minimum fitness for an iteration
+       :param self: - self of class
+       :return: minimum
+       """
+        return min(self.pop_fitness)
+
     def start(self):
         """
         this method starts the Genetic Algorithm

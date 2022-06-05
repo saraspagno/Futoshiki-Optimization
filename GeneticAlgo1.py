@@ -9,24 +9,6 @@ class GeneticAlgo1(GeneticAlgo):
     this class represents a standard genetic algorithm
     """
 
-    def create_random_grid(self):
-        return super().create_random_grid()
-
-    def fitness(self, grid):
-        return super().fitness(grid)
-
-    def initialize_population(self):
-        super().initialize_population()
-
-    def selection_with_prob(self):
-        return super().selection_with_prob()
-
-    def cross_over(self, grid1, grid2):
-        return super().cross_over(grid1, grid2)
-
-    def mutation(self, grid, prob):
-        return super().mutation(grid, prob)
-
     def start(self):
         """
         this method starts the Genetic Algorithm
@@ -35,6 +17,7 @@ class GeneticAlgo1(GeneticAlgo):
         """
         self.initialize_population()
         iteration, restarts = 1, 0
+        average, minimum = [], []
         while restarts < constants.MAX_RESTARTS:
             if iteration == constants.MAX_ITERATIONS_EASY_6x6:
                 print(f'\n\n\nRESTARTING FOR N.{restarts}')
@@ -44,6 +27,8 @@ class GeneticAlgo1(GeneticAlgo):
 
             print(f'\n\n\nITERATION N.{iteration}')
             constants.print_population_and_fitness(self.population, self.pop_fitness)
+            average.append(self.get_average())
+            minimum.append(self.get_minimum())
             iteration += 1
 
             new_population = []
@@ -54,7 +39,7 @@ class GeneticAlgo1(GeneticAlgo):
             print('Min is: ', min_fitness)
             if min_fitness == 0:
                 print(f'Solution found: {self.population[min_index]}')
-                return restarts * constants.MAX_ITERATIONS_EASY_6x6 + iteration
+                return restarts * constants.MAX_ITERATIONS + iteration, average, minimum
 
             for i in range(constants.COPY_RATE):
                 new_population.append(self.population[min_index].copy())
@@ -73,4 +58,4 @@ class GeneticAlgo1(GeneticAlgo):
 
             self.population = np.array(new_population)
             self.pop_fitness = np.array(new_fitness)
-        return -1
+        return -1, average, minimum
