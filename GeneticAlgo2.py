@@ -22,7 +22,8 @@ class GeneticAlgo2(GeneticAlgo):
         new_fitness.append(self.fitness(grid))
         grid_optimized = self.optimize(grid)
         if self.fitness(grid_optimized) == 0:
-            print(f'Solution found: {grid_optimized}')
+            print(f'Solution found in Darwinian:')
+            constants.print_board(grid_optimized)
             return True
         return False
 
@@ -55,7 +56,8 @@ class GeneticAlgo2(GeneticAlgo):
             min_fitness = self.pop_fitness[min_index]
             print('Min is: ', min_fitness)
             if min_fitness == 0:
-                print(f'Solution found: {self.population[min_index]}')
+                print(f'Solution found in Darwinian:')
+                constants.print_board(self.population[min_index])
                 return restarts * constants.MAX_ITERATIONS + iteration, average, minimum
 
             for i in range(constants.COPY_RATE):
@@ -73,4 +75,5 @@ class GeneticAlgo2(GeneticAlgo):
                 new_fitness[i] = self.fitness(new_population[i])
             self.population = np.array(new_population)
             self.pop_fitness = np.array(new_fitness)
+        print('Solution not found in Darwinian.')
         return -1, average, minimum

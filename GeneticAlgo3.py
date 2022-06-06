@@ -51,7 +51,8 @@ class GeneticAlgo3(GeneticAlgo):
             min_fitness = self.pop_fitness[min_index]
             print('Min is: ', min_fitness)
             if min_fitness == 0:
-                print(f'Solution found: {self.population[min_index]}')
+                print(f'Solution found in Lamarck:')
+                constants.print_board(self.population[min_index])
                 return restarts * constants.MAX_ITERATIONS + iteration, average, minimum
 
             for i in range(constants.COPY_RATE):
@@ -67,4 +68,5 @@ class GeneticAlgo3(GeneticAlgo):
                 new_fitness[i] = self.fitness(new_population[i])
             self.population = np.array(new_population)
             self.pop_fitness = np.array(new_fitness)
+        print('Solution not found in Lamarck.')
         return -1, average, minimum

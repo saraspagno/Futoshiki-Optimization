@@ -24,13 +24,19 @@ inputs = ['args_tests/easy/5x5/args1.txt',
 classes = ['Easy 5x5', 'Easy 6x6', 'Easy 7x7', 'Tricky 5x5', 'Tricky 6x6', 'Tricky 7x7']
 
 
-def print_population(population):
-    print('Population:')
-    for i in range(len(population)):
-        print(f'{i}: {population[i]}')
+def print_board(board):
+    print('══' * int((N * 1.5 + 1)))
+    for r, row in enumerate(board):
+        print('║', end="")
+        for v, value in enumerate(row):
+            print(f' {value} ', end="")
+        print('║\n', end="")
+    print('══' * int((N * 1.5 + 1)))
 
 
 def print_population_and_fitness(population, fitness):
     print('Population:')
     for i in range(len(population)):
-        print(f'{i}:\n {population[i]}, fitness: {fitness[i]}')
+        board = population[i]
+        print(f'N.{i}, Fitness: {fitness[i]}:')
+        print_board(board)

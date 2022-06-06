@@ -100,25 +100,25 @@ if __name__ == '__main__':
 
     # Standard Version
     print('\n\nStarting Standard version')
-    time.sleep(2)
+    time.sleep(5)
     constant_numbers, greater_constraints = parse_args(sys.argv[1])
     game = Game(constant_numbers, greater_constraints)
     genetic_algo = GeneticAlgo1(game)
     genetic_algo.start()
-    time.sleep(10)
+    time.sleep(8)
 
     # Darwinian Version
     print('\n\nStarting Darwinian version')
-    time.sleep(2)
+    time.sleep(5)
     constant_numbers, greater_constraints = parse_args(sys.argv[1])
     game = Game(constant_numbers, greater_constraints)
     genetic_algo = GeneticAlgo2(game)
     genetic_algo.start()
-    time.sleep(10)
+    time.sleep(8)
 
     # Lamarck Version
     print('\n\nStarting Lamarck version')
-    time.sleep(2)
+    time.sleep(5)
     constant_numbers, greater_constraints = parse_args(sys.argv[1])
     game = Game(constant_numbers, greater_constraints)
     genetic_algo = GeneticAlgo3(game)
