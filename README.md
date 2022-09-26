@@ -1,4 +1,4 @@
-#Futoshuki Optimization
+# Futoshuki Optimization
 
 Futoshiki is a board-based puzzle game, from the same family of the known puzzle Sudoku.
 For more information and online playing see: [www.futoshiki.org](https://www.futoshiki.org/).
