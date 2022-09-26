@@ -1,53 +1,49 @@
+import abc
+from abc import ABC, abstractmethod
 import random
 import numpy as np
 import constants
 from Game import Game
 
 
-# def print_board(board):
-#     print('\n'.join(['\t'.join([str(cell) for cell in j]) for j in board]))
+class GeneticAlgo(ABC):
+    """
+    this class represents a standard genetic algorithm
+    """
 
-def print_population(population):
-    print('Population:')
-    for i in range(len(population)):
-        print(f'{i}: {population[i]}')
-
-
-def print_population_and_fitness(population, fitness):
-    print('Population:')
-    for i in range(len(population)):
-        print(f'{i}\n: {population[i]}, fitness: {fitness[i]}')
-
-
-class GeneticAlgo:
     def __init__(self, game: Game):
+        """
+        this method creates init the Genetic Algorithm
+        :param game: from here we can deduct constant and greater values
+        :return: none
+        """
         self.game = game
         self.population = []
         self.pop_fitness = []
-        self.counter = 0
-
-    def set_constants_in_grid(self, grid):
-        for c in self.game.constant_numbers:
-            grid[c[0], c[1]] = c[2]
 
     def create_random_grid(self):
+        """
+        this method creates a random grid for the genetic algorithm.
+        the random grid must rows respecting unique numbers 1 to N, and respecting constant elements of given board
+        the element 1 won't appear as greater sign, and the element N won't appear as smaller sign
+        :param self: self of class
+        :return: the create grid
+        """
         grid = np.array([[0 for i in range(constants.N)] for j in range(constants.N)])
-        row_values = [i for i in range(constants.N)]
-        for c in self.game.constant_numbers:
-            grid[c[0], c[1]] = c[2]
         # for each row
-        for i in range(constants.N):
-            filled_indexes = self.game.taken_indexes_by_row[i].copy()
-            for value in range(1, constants.N + 1):
-                if value not in self.game.taken_values_by_row[i]:
-                    possible_indexes = [x for x in row_values if x not in filled_indexes]
-                    random_index = random.choice(possible_indexes)
-                    grid[i][random_index] = value
-                    filled_indexes.append(random_index)
+        for i, row in enumerate(grid):
+            row = random.choice(self.game.row_possibilities[i])
+            grid[i] = row
         return grid
 
-    # function to receive a grid and return a score (highest fitness -> worst board)
+    # function to receive a grid and return a score (the highest fitness -> worst board)
     def fitness(self, grid):
+        """
+        this method evaluates the fitness of a given grid
+        :param self: self of class
+        :param grid: the grid to evaluate
+        :return: fitness of grid
+        """
         errors = 0
         # counting the greater constraint
         for i in range(len(self.game.constraints)):
@@ -62,39 +58,43 @@ class GeneticAlgo:
             _, counts = np.unique(column, return_counts=True)
             # adding 0 if appears 1, 2 if appears 2, 4 if appears 3, etc.
             for occurrence in counts:
-                # errors += (occurrence - 1) * 2
-                if occurrence != 1:
-                    errors += pow(constants.C, (occurrence - 1))
-        return errors
+                errors += (occurrence - 1)
+                # if occurrence != 1:
+                #     errors += pow(constants.C, (occurrence - 1))
+        return float(errors)
 
-    # function to create M random grids
     def initialize_population(self):
+        """
+        this method initializes a population for the genetic algorithm
+        :param self: self of class
+        :return: none
+        """
+        self.population = []
+        self.pop_fitness = []
         for i in range(constants.M):
             self.population.append(self.create_random_grid())
             fitness_value = self.fitness(self.population[i])
             self.pop_fitness.append(float(fitness_value))
-        print_population_and_fitness(self.population, self.pop_fitness)
 
     def selection_with_prob(self):
+        """
+        this method select 2 grids from the population with probability on their fitness
+        :param self: self of class
+        :return: 2 grids from population
+        """
         inverted = np.reciprocal(self.pop_fitness)
         normalized = np.divide(inverted, np.sum(inverted))
         chosen = np.random.choice(range(len(self.population)), 2, p=normalized)
-        print_population_and_fitness(self.population, self.pop_fitness)
-        print(
-            f'Selection, chosen indexes: {chosen[0], chosen[1]}, with weights: {self.pop_fitness[chosen[0]], self.pop_fitness[chosen[1]]}')
         return self.population[chosen[0]], self.population[chosen[1]]
 
-    def selection(self):
-        print_population_and_fitness(self.population, self.pop_fitness)
-        indexes = np.argpartition(self.pop_fitness, 2)
-        print(
-            f'Selection, chosen indexes: {indexes[0], indexes[1]}, with weights: {self.pop_fitness[indexes[0]], self.pop_fitness[indexes[1]]}')
-        return self.population[indexes[0]], self.population[indexes[1]]
-
-    # todo: how to implement different dividers? now it's always half
     def cross_over(self, grid1, grid2):
-        # divider = len(grid1) // 2
-        # divider = 1
+        """
+        this method takes two grids and returns a third grid generated from cross-over
+        :param self: self of class
+        :param grid1: first grid for cross over
+        :param grid2: second grid for cross over
+        :return: the result of cross-over
+        """
         divider = random.choice(range(5))
         new_grid = []
         for x in grid1[:divider]:
@@ -103,60 +103,63 @@ class GeneticAlgo:
             new_grid.append(x.tolist())
         return np.array(new_grid)
 
-    def mutation(self, grid):
-        do = random.random() < constants.MU
+    def mutation(self, grid, prob):
+        """
+        this method takes a grid and performs a mutation with a certain probability
+        :param self: self of class
+        :param grid: grid to mutate
+        :param prob: probability to whether performing the mutation or not
+        :return: none
+        """
+        do = random.random() < prob
         if do:
-            print('Mutation is happening!!')
-            print('Grid Before:', grid)
-            to_change = len(grid) // 2
+            to_change = random.choice(range(1, constants.N + 1))
             random_row_indexes = random.sample(range(constants.N), to_change)
             for i in random_row_indexes:
-                new_row = [0 for i in range(constants.N)]
-                for j, v in zip(self.game.taken_indexes_by_row[i], self.game.taken_values_by_row[i]):
-                    new_row[j] = v
-                filled_indexes = self.game.taken_indexes_by_row[i].copy()
-                for n in range(1, constants.N + 1):
-                    if n not in self.game.taken_values_by_row[i]:
-                        possible_indexes = [x for x in range(constants.N) if x not in filled_indexes]
-                        random_index = random.choice(possible_indexes)
-                        new_row[random_index] = n
-                        filled_indexes.append(random_index)
+                new_row = random.choice(self.game.row_possibilities[i])
                 grid[i] = new_row
-            print('Grid After:', grid)
+        return grid
 
-    def replace(self, new_grid):
-        new_fitness = self.fitness(new_grid)
-        worst_index = np.argmax(self.pop_fitness)
-        worst_grid = self.population[worst_index]
-        if np.equal(new_grid, worst_grid).all():
-            self.counter += 1
-        else:
-            self.counter = 0
-        if new_fitness == 0:
-            print('Found a solution!!')
-            return True
-        if self.counter == 10:
-            print("Converged without solution.")
-        self.population[worst_index] = new_grid
-        self.pop_fitness[worst_index] = float(new_fitness)
-        return False
+    def optimize(self, grid):
+        """
+        this method locally optimizes one grid by replacing rows that have same values in columns
+        :param self: self of class
+        :param grid: the grid to optimize
+        :return: the optimized grid
+        """
+        grid = grid.copy()
+        for i in range(int(constants.N / 2)):
+            for column in grid.T:
+                a, counts = np.unique(column, return_counts=True)
+                for i, occurrence in enumerate(counts):
+                    if occurrence > 1:
+                        indexes = np.where(a[i] == column)[0]
+                        for j in indexes:
+                            row = random.choice(self.game.row_possibilities[j])
+                            grid[j] = row
+                        break
+            return grid
 
-    # def stop_algo(self):
-    #     min_fitness = np.min(self.pop_fitness)
-    #     print('Iteration min:', min_fitness)
-    #     max_fitness = np.max(self.pop_fitness)
-    #     print('Compare:', min_fitness, max_fitness)
-    #     return min_fitness == 0
+    def get_average(self):
+        """
+        this method returns the average fitness for an iteration
+        :param self: - self of class
+        :return: average
+        """
+        return sum(self.pop_fitness) / len(self.pop_fitness)
+
+    def get_minimum(self):
+        """
+       this method returns the minimum fitness for an iteration
+       :param self: - self of class
+       :return: minimum
+       """
+        return min(self.pop_fitness)
 
     def start(self):
-        self.initialize_population()
-        iteration = 0
-        should_stop = False
-        while not should_stop:
-            print(f'\n\n\nITERATION N.{iteration}')
-            print('Counter: ', self.counter)
-            iteration += 1
-            grid1, grid2 = self.selection_with_prob()
-            grid3 = self.cross_over(grid1, grid2)
-            self.mutation(grid3)
-            should_stop = self.replace(grid3)
+        """
+        this method starts the Genetic Algorithm
+        :param self: - self of class
+        :return: none
+        """
+        pass
